@@ -1,7 +1,7 @@
 import os
 import subprocess
 import xml.etree.ElementTree as ET
-
+import re
 from config import load_config
 from utils import print_with_color
 
@@ -98,7 +98,10 @@ class AndroidController:
         adb_command = f"adb -s {self.device} shell wm size"
         result = execute_adb(adb_command)
         if result != "ERROR":
-            return map(int, result.split(": ")[1].split("x"))
+            numbers = re.findall(r'\d+', result)
+            if len(numbers) < 2:
+                raise ValueError("Expected to find more than two numbers in the adb output.")
+            return int(numbers[0]), int(numbers[1])
         return 0, 0
 
     def get_screenshot(self, prefix, save_dir):
